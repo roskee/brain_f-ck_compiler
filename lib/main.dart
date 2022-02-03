@@ -12,7 +12,9 @@ class BrainFucked extends StatelessWidget {
     return const MaterialApp(
       title: 'BrainF*cked',
       home: Scaffold(
-        body: Text('Hello world'),
+        body: Center(
+          child: Text('Brain F*cked'),
+        ),
       ),
     );
   }
