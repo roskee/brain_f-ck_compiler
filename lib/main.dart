@@ -1,5 +1,6 @@
 import 'package:brain_fuck_compiler/about.dart';
 import 'package:brain_fuck_compiler/compiler.dart';
+import 'package:brain_fuck_compiler/help.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -42,13 +43,17 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                 if (value == 'about') {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const AboutPage()));
+                } else if (value == 'help') {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const HelpPage()));
                 }
               },
-              itemBuilder: (context) => [
+              itemBuilder: (context) => const [
                     PopupMenuItem(
-                      child: const Text('About App'),
+                      child: Text('About App'),
                       value: 'about',
-                    )
+                    ),
+                    PopupMenuItem(child: Text('Help'), value: 'help')
                   ])
         ],
       ),
@@ -57,7 +62,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
         child: Center(
           child: Column(
             children: [
-              Text('untitled.bf'),
+              const Text('untitled.bf'),
               Expanded(
                 child: Card(
                   child: Padding(
@@ -90,35 +95,52 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
               SizedBox(
                   height: 5,
                   child: running ? const LinearProgressIndicator() : null),
-              SizedBox(
-                height: 50,
-                child: ButtonBar(
-                  alignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(primary: Colors.yellow),
-                        onPressed: () {},
-                        child: const Text('Save Code')),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(primary: Colors.green),
-                        onPressed: () {
-                          compiler.compile(controller.value.text).then((value) {
-                            setState(() {
-                              running = false;
-                              output = value != null
-                                  ? SelectableText(value)
-                                  : const Text(
-                                      'Syntax Error',
-                                      style: TextStyle(color: Colors.red),
-                                    );
+              Padding(
+                padding: const EdgeInsets.only(left: 2.0, right: 2.0),
+                child: SizedBox(
+                  height: 50,
+                  child: ButtonBar(
+                    alignment: MainAxisAlignment.spaceBetween,
+                    buttonPadding: const EdgeInsets.all(0),
+                    children: [
+                      ButtonBar(
+                        children: [
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.yellow),
+                              onPressed: () {},
+                              child: const Text('Save Code')),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.blue),
+                              onPressed: () {},
+                              child: const Text('Open'))
+                        ],
+                      ),
+                      ElevatedButton(
+                          style:
+                              ElevatedButton.styleFrom(primary: Colors.green),
+                          onPressed: () {
+                            compiler
+                                .compile(controller.value.text)
+                                .then((value) {
+                              setState(() {
+                                running = false;
+                                output = value != null
+                                    ? SelectableText(value)
+                                    : const Text(
+                                        'Syntax Error',
+                                        style: TextStyle(color: Colors.red),
+                                      );
+                              });
                             });
-                          });
-                          setState(() {
-                            running = true;
-                          });
-                        },
-                        child: const Text('Run')),
-                  ],
+                            setState(() {
+                              running = true;
+                            });
+                          },
+                          child: const Text('Run')),
+                    ],
+                  ),
                 ),
               ),
               Align(
@@ -142,7 +164,8 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                   child: Card(
                     child: ListView(
                       children: [
-                        Padding(padding: EdgeInsets.all(8.0), child: output)
+                        Padding(
+                            padding: const EdgeInsets.all(8.0), child: output)
                       ],
                     ),
                   ))
