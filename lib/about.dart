@@ -25,7 +25,9 @@ class AboutPage extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                    'Hello, There! I created this app for bored programmers to challenge thier minds with the famious \'Brain F*ck\' programming language. Try creating awesome patterns - I assure you it won\'t be eazy :)'),
+                  'Hello, There! I created this app for bored programmers to challenge thier minds with the famious \'Brain F*ck\' programming language.\nTry creating awesome patterns - I assure you it won\'t be eazy :)',
+                  textAlign: TextAlign.justify,
+                ),
               ),
             ],
           )),

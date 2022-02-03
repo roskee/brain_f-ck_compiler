@@ -3,6 +3,10 @@ import 'package:brain_fuck_compiler/compiler.dart';
 import 'package:brain_fuck_compiler/help.dart';
 import 'package:flutter/material.dart';
 
+// TODO: separated output
+// TODO: save code
+// TODO: open code from file
+// TODO: show output in full screen
 void main() {
   runApp(const BrainFucked());
 }
@@ -30,7 +34,12 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
   Compiler compiler = Compiler();
   TextEditingController controller = TextEditingController();
   int lines = 1, characters = 0;
-  Widget output = const SelectableText('');
+  String output = '';
+  String separate(String string) =>
+      separateBytes ? string.characters.join(' ') : string;
+  bool outputError = false;
+  bool byteOutput = false;
+  bool separateBytes = false;
   bool running = false;
   @override
   Widget build(BuildContext context) {
@@ -63,34 +72,74 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
           child: Column(
             children: [
               const Text('untitled.bf'),
-              Expanded(
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 2.2,
                 child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      controller: controller,
-                      keyboardType: TextInputType.multiline,
-                      expands: true,
-                      maxLines: null,
-                      onEditingComplete: () {},
-                      onChanged: (value) {
-                        setState(() {
-                          lines = value.characters
-                                  .where((p0) => p0 == '\n')
-                                  .length +
-                              1;
-                          characters = value.characters.length;
-                        });
-                      },
-                      enableInteractiveSelection: true,
-                      decoration: InputDecoration(
-                          counter:
-                              Text('Lines: $lines , Characters: $characters'),
-                          isDense: true,
-                          hintText: 'Write your code here...'),
-                    ),
+                  child: ListView(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Column(
+                                    children: List.generate(
+                                  lines,
+                                  (index) => Text(
+                                    '${index + 1}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .subtitle1!
+                                        .copyWith(height: 1.2),
+                                  ),
+                                )),
+                              ),
+                              const VerticalDivider(),
+                              Expanded(
+                                child: TextField(
+                                  scrollPhysics:
+                                      const NeverScrollableScrollPhysics(),
+                                  controller: controller,
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: null,
+                                  minLines: null,
+                                  expands: true,
+                                  onEditingComplete: () {},
+                                  onChanged: (value) {
+                                    setState(() {
+                                      lines = value.characters
+                                              .where((p0) => p0 == '\n')
+                                              .length +
+                                          1;
+                                      characters = value.characters.length;
+                                    });
+                                  },
+                                  enableInteractiveSelection: true,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .subtitle1!
+                                      .copyWith(
+                                          height: 1.2, letterSpacing: 1.5),
+                                  decoration: const InputDecoration(
+                                      border: InputBorder.none,
+                                      isDense: true,
+                                      hintText: 'Write your code here...'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text('Lines: $lines , Characters: $characters'),
               ),
               SizedBox(
                   height: 5,
@@ -120,24 +169,22 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                       ElevatedButton(
                           style:
                               ElevatedButton.styleFrom(primary: Colors.green),
-                          onPressed: () {
-                            compiler
-                                .compile(controller.value.text)
-                                .then((value) {
-                              setState(() {
-                                running = false;
-                                output = value != null
-                                    ? SelectableText(value)
-                                    : const Text(
-                                        'Syntax Error',
-                                        style: TextStyle(color: Colors.red),
-                                      );
-                              });
-                            });
-                            setState(() {
-                              running = true;
-                            });
-                          },
+                          onPressed: running
+                              ? null
+                              : () {
+                                  compiler
+                                      .compile(controller.value.text)
+                                      .then((value) {
+                                    setState(() {
+                                      running = false;
+                                      output = value ?? '';
+                                      outputError = value == null;
+                                    });
+                                  });
+                                  setState(() {
+                                    running = true;
+                                  });
+                                },
                           child: const Text('Run')),
                     ],
                   ),
@@ -149,26 +196,96 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Output'),
-                    TextButton(
-                        onPressed: () {
-                          setState(() {
-                            output = const SelectableText('');
-                          });
-                        },
-                        child: const Text('Clear'))
+                    ButtonBar(
+                      buttonPadding: const EdgeInsets.all(0),
+                      children: [
+                        PopupMenuButton(
+                            // icon: Icon(Icons.list),
+                            enableFeedback: false,
+                            onSelected: (value) {
+                              if (value == 'separate') {
+                                setState(() {
+                                  separateBytes = !separateBytes;
+                                });
+                              } else if (value == 'byte') {
+                                setState(() {
+                                  byteOutput = !byteOutput;
+                                });
+                              }
+                            },
+                            child: const Text(
+                              'Options',
+                              style: TextStyle(color: Colors.green),
+                            ), //TextButton(child: const Text('Options'),onPressed: (){},),
+                            itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                      value: 'separate',
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text('Separate bytes'),
+                                          separateBytes
+                                              ? const Icon(
+                                                  Icons.check_box,
+                                                  color: Colors.lightGreen,
+                                                )
+                                              : const Icon(
+                                                  Icons.check_box_outline_blank,
+                                                  color: Colors.lightGreen,
+                                                )
+                                        ],
+                                      )),
+                                  PopupMenuItem(
+                                      value: 'byte',
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text('Show byte output'),
+                                          byteOutput
+                                              ? const Icon(
+                                                  Icons.check_box,
+                                                  color: Colors.lightGreen,
+                                                )
+                                              : const Icon(
+                                                  Icons.check_box_outline_blank,
+                                                  color: Colors.lightGreen,
+                                                )
+                                        ],
+                                      ))
+                                ]),
+                        TextButton(
+                            onPressed: () {
+                              setState(() {
+                                output = '';
+                              });
+                            },
+                            child: const Text(
+                              'Clear',
+                              style: TextStyle(color: Colors.red),
+                            ))
+                      ],
+                    )
                   ],
                 ),
               ),
-              SizedBox(
-                  height: 150,
+              Expanded(
                   child: Card(
-                    child: ListView(
-                      children: [
-                        Padding(
-                            padding: const EdgeInsets.all(8.0), child: output)
-                      ],
-                    ),
-                  ))
+                child: ListView(
+                  children: [
+                    Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: outputError
+                            ? const SelectableText(
+                                'Syntax Error',
+                                style: TextStyle(color: Colors.red),
+                              )
+                            : SelectableText(
+                                byteOutput ? output.codeUnits.join() : output))
+                  ],
+                ),
+              ))
             ],
           ),
         ),
