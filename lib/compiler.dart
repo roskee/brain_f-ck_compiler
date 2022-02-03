@@ -28,7 +28,8 @@ class Compiler {
   ///
   /// It returns the output created by `.` commands in [command].
   /// But if [command] doesn't produce any outputs empty string is returned
-  String? compile(String command, {List<int> inputs = const []}) {
+  Future<String?> compile(String command, {List<int> inputs = const []}) async {
+    //await Future.delayed(Duration(seconds: 2), () {});
     _clear();
     if (!_parseInput(command)) return null;
     inputs = _getParsedInputs(command, inputs);

@@ -1,3 +1,4 @@
+import 'package:brain_fuck_compiler/about.dart';
 import 'package:brain_fuck_compiler/compiler.dart';
 import 'package:flutter/material.dart';
 
@@ -5,88 +6,147 @@ void main() {
   runApp(const BrainFucked());
 }
 
-class BrainFucked extends StatefulWidget {
+class BrainFucked extends StatelessWidget {
   const BrainFucked({Key? key}) : super(key: key);
 
   @override
-  State<BrainFucked> createState() => _BrainFuckedState();
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'BrainF*cked',
+        theme:
+            ThemeData(primarySwatch: Colors.lightGreen, fontFamily: "Consolas"),
+        home: const BrainFuckedApp(),
+      );
 }
 
-class _BrainFuckedState extends State<BrainFucked> {
+class BrainFuckedApp extends StatefulWidget {
+  const BrainFuckedApp({Key? key}) : super(key: key);
+
+  @override
+  State<BrainFuckedApp> createState() => _BrainFuckedAppState();
+}
+
+class _BrainFuckedAppState extends State<BrainFuckedApp> {
   Compiler compiler = Compiler();
   TextEditingController controller = TextEditingController();
+  int lines = 1, characters = 0;
   Widget output = const SelectableText('');
+  bool running = false;
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BrainF*cked',
-      theme:
-          ThemeData(primarySwatch: Colors.lightGreen, fontFamily: "Consolas"),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('BrainF*cked Compiler'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: Column(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.multiline,
-                    expands: true,
-                    maxLines: null,
-                    onEditingComplete: () {},
-                    enableInteractiveSelection: true,
-                    decoration: const InputDecoration(
-                        isDense: true, hintText: 'Write your code here...'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('BrainF*cked Compiler'),
+        actions: [
+          PopupMenuButton(
+              onSelected: (value) {
+                if (value == 'about') {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const AboutPage()));
+                }
+              },
+              itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: const Text('About App'),
+                      value: 'about',
+                    )
+                  ])
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: Column(
+            children: [
+              Text('untitled.bf'),
+              Expanded(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: controller,
+                      keyboardType: TextInputType.multiline,
+                      expands: true,
+                      maxLines: null,
+                      onEditingComplete: () {},
+                      onChanged: (value) {
+                        setState(() {
+                          lines = value.characters
+                                  .where((p0) => p0 == '\n')
+                                  .length +
+                              1;
+                          characters = value.characters.length;
+                        });
+                      },
+                      enableInteractiveSelection: true,
+                      decoration: InputDecoration(
+                          counter:
+                              Text('Lines: $lines , Characters: $characters'),
+                          isDense: true,
+                          hintText: 'Write your code here...'),
+                    ),
                   ),
                 ),
-                SizedBox(
-                  height: 50,
-                  child: ButtonBar(
-                    alignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton(
-                          style:
-                              ElevatedButton.styleFrom(primary: Colors.yellow),
-                          onPressed: () {},
-                          child: const Text('Save Code')),
-                      ElevatedButton(
-                          style:
-                              ElevatedButton.styleFrom(primary: Colors.green),
-                          onPressed: () {
-                            String? result =
-                                compiler.compile(controller.value.text);
+              ),
+              SizedBox(
+                  height: 5,
+                  child: running ? const LinearProgressIndicator() : null),
+              SizedBox(
+                height: 50,
+                child: ButtonBar(
+                  alignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(primary: Colors.yellow),
+                        onPressed: () {},
+                        child: const Text('Save Code')),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(primary: Colors.green),
+                        onPressed: () {
+                          compiler.compile(controller.value.text).then((value) {
                             setState(() {
-                              output = result != null
-                                  ? SelectableText(result)
+                              running = false;
+                              output = value != null
+                                  ? SelectableText(value)
                                   : const Text(
-                                      'Error',
+                                      'Syntax Error',
                                       style: TextStyle(color: Colors.red),
                                     );
                             });
-                          },
-                          child: const Text('Run')),
-                    ],
-                  ),
+                          });
+                          setState(() {
+                            running = true;
+                          });
+                        },
+                        child: const Text('Run')),
+                  ],
                 ),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Output'),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Output'),
+                    TextButton(
+                        onPressed: () {
+                          setState(() {
+                            output = const SelectableText('');
+                          });
+                        },
+                        child: const Text('Clear'))
+                  ],
                 ),
-                SizedBox(
-                    height: 200,
-                    child: Card(
-                      child: ListView(
-                        children: [
-                          Padding(padding: EdgeInsets.all(8.0), child: output)
-                        ],
-                      ),
-                    ))
-              ],
-            ),
+              ),
+              SizedBox(
+                  height: 150,
+                  child: Card(
+                    child: ListView(
+                      children: [
+                        Padding(padding: EdgeInsets.all(8.0), child: output)
+                      ],
+                    ),
+                  ))
+            ],
           ),
         ),
       ),
