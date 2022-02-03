@@ -44,7 +44,7 @@ class _BrainFuckedState extends State<BrainFucked> {
                     ElevatedButton(
                         onPressed: () {
                           String? result =
-                              compiler.parse(controller.value.text);
+                              compiler.compile(controller.value.text);
                           setState(() {
                             output = result ?? 'Error';
                           });

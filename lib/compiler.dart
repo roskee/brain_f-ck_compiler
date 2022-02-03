@@ -18,7 +18,7 @@ import 'package:flutter/services.dart';
 class Compiler {
   final List<int> _array = List.filled(30000, 0, growable: false);
   int _index = 0;
-
+  int _inputCounter = 0;
   // PUBLIC METHODS
 
   /// This function interpretes [command] as a brainf*cked code with optional inputs [inputs] if requested.
@@ -28,11 +28,16 @@ class Compiler {
   ///
   /// It returns the output created by `.` commands in [command].
   /// But if [command] doesn't produce any outputs empty string is returned
-  String? parse(String command, {List<int> inputs = const []}) {
+  String? compile(String command, {List<int> inputs = const []}) {
     _clear();
     if (!_parseInput(command)) return null;
     inputs = _getParsedInputs(command, inputs);
-    int inputCounter = 0;
+    String output = parse(command, inputs: inputs);
+    print('finished');
+    return output;
+  }
+
+  String parse(String command, {List<int> inputs = const []}) {
     String output = '';
     for (int i = 0; i < command.length; i++) {
       // for each input variable
@@ -50,7 +55,7 @@ class Compiler {
           _decrementValue();
           break;
         case 44: // ,
-          _setInput(inputs[inputCounter++]);
+          _setInput(inputs[_inputCounter++]);
           break;
         case 46: // .
           output += _getOutput();
@@ -58,8 +63,10 @@ class Compiler {
         case 91: // [
           while (_array[_index] != 0) {
             // loop
-            parse(command.substring(i + 1, _indexOfBracket(command, i)));
+            output +=
+                parse(command.substring(i + 1, _indexOfBracket(command, i)));
           }
+          i = _indexOfBracket(command, i) + 1;
           break;
         default: // comment character
       }
@@ -84,7 +91,7 @@ class Compiler {
       if (codeUnit == 91) {
         exCloBrackets++;
       } else if (codeUnit == 93) {
-        if (++exCloBrackets < 0) return false;
+        if (--exCloBrackets < 0) return false;
       }
     }
     return exCloBrackets == 0;
