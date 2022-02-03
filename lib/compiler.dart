@@ -18,10 +18,8 @@ import 'package:flutter/services.dart';
 class Compiler {
   final List<int> _array = List.filled(30000, 0, growable: false);
   int _index = 0;
-  void _clear() {
-    _array.setAll(0, List.filled(30000, 0, growable: false));
-    _index = 0;
-  }
+
+  // PUBLIC METHODS
 
   /// This function interpretes [command] as a brainf*cked code with optional inputs [inputs] if requested.
   ///
@@ -67,6 +65,17 @@ class Compiler {
       }
     }
     return output;
+  }
+
+  int getInputCount(String command) {
+    return command.codeUnits.where((element) => element == 44).length;
+  }
+
+  // PRIVATE METHODS
+
+  void _clear() {
+    _array.setAll(0, List.filled(30000, 0, growable: false));
+    _index = 0;
   }
 
   bool _parseInput(String command) {
