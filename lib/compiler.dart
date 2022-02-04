@@ -28,17 +28,18 @@ class Compiler {
   ///
   /// It returns the output created by `.` commands in [command].
   /// But if [command] doesn't produce any outputs empty string is returned
-  Future<String?> compile(String command, {List<int> inputs = const []}) async {
+  Future<List<String>?> compile(String command,
+      {List<int> inputs = const []}) async {
     await Future.delayed(Duration(seconds: 2), () {});
     _clear();
     if (!_parseInput(command)) return null;
     inputs = _getParsedInputs(command, inputs);
-    String output = parse(command, inputs: inputs);
+    List<String> output = parse(command, inputs: inputs);
     return output;
   }
 
-  String parse(String command, {List<int> inputs = const []}) {
-    String output = '';
+  List<String> parse(String command, {List<int> inputs = const []}) {
+    List<String> output = [];
     for (int i = 0; i < command.length; i++) {
       // for each input variable
       switch (command.codeUnitAt(i)) {
@@ -58,13 +59,15 @@ class Compiler {
           _setInput(inputs[_inputCounter++]);
           break;
         case 46: // .
-          output += _getOutput();
+          // output += _getOutput();
+          output.add(_getOutput());
           break;
         case 91: // [
           while (_array[_index] != 0) {
             // loop
-            output +=
-                parse(command.substring(i + 1, _indexOfBracket(command, i)));
+            //output +=
+            output.addAll(
+                parse(command.substring(i + 1, _indexOfBracket(command, i))));
           }
           i = _indexOfBracket(command, i) + 1;
           break;

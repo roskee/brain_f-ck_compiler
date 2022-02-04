@@ -3,7 +3,6 @@ import 'package:brain_fuck_compiler/compiler.dart';
 import 'package:brain_fuck_compiler/help.dart';
 import 'package:flutter/material.dart';
 
-// TODO: separated output
 // TODO: save code
 // TODO: open code from file
 // TODO: show output in full screen
@@ -34,7 +33,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
   Compiler compiler = Compiler();
   TextEditingController controller = TextEditingController();
   int lines = 1, characters = 0;
-  String output = '';
+  List<String> output = [];
   String separate(String string) =>
       separateBytes ? string.characters.join(' ') : string;
   bool outputError = false;
@@ -44,6 +43,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('BrainF*cked Compiler'),
         actions: [
@@ -177,7 +177,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                                       .then((value) {
                                     setState(() {
                                       running = false;
-                                      output = value ?? '';
+                                      output = value ?? [];
                                       outputError = value == null;
                                     });
                                   });
@@ -258,7 +258,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                         TextButton(
                             onPressed: () {
                               setState(() {
-                                output = '';
+                                output = [];
                               });
                             },
                             child: const Text(
@@ -281,8 +281,12 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                                 'Syntax Error',
                                 style: TextStyle(color: Colors.red),
                               )
-                            : SelectableText(
-                                byteOutput ? output.codeUnits.join() : output))
+                            : SelectableText(byteOutput
+                                ? output
+                                    .join()
+                                    .codeUnits
+                                    .join(separateBytes ? ' ' : '')
+                                : output.join(separateBytes ? ' ' : '')))
                   ],
                 ),
               ))
