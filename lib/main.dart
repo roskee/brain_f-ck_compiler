@@ -2,10 +2,11 @@ import 'package:brain_fuck_compiler/about.dart';
 import 'package:brain_fuck_compiler/compiler.dart';
 import 'package:brain_fuck_compiler/help.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 
 // TODO: save code
 // TODO: open code from file
-// TODO: show output in full screen
+// TODO: bug - disable autofocus on editor
 void main() {
   runApp(const BrainFucked());
 }
@@ -32,6 +33,7 @@ class BrainFuckedApp extends StatefulWidget {
 class _BrainFuckedAppState extends State<BrainFuckedApp> {
   Compiler compiler = Compiler();
   TextEditingController controller = TextEditingController();
+  FocusNode focusNode = FocusNode(canRequestFocus: false);
   int lines = 1, characters = 0;
   List<String> output = [];
   String separate(String string) =>
@@ -71,7 +73,9 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
         child: Center(
           child: Column(
             children: [
-              const Text('untitled.bf'),
+              const Text(
+                'untitled.bf',
+              ),
               SizedBox(
                 height: MediaQuery.of(context).size.height / 2.2,
                 child: Card(
@@ -105,9 +109,10 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                                   controller: controller,
                                   keyboardType: TextInputType.multiline,
                                   maxLines: null,
+                                  focusNode: focusNode,
                                   minLines: null,
+                                  autofocus: false,
                                   expands: true,
-                                  onEditingComplete: () {},
                                   onChanged: (value) {
                                     setState(() {
                                       lines = value.characters
@@ -167,6 +172,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                         ],
                       ),
                       ElevatedButton(
+                          autofocus: true,
                           style:
                               ElevatedButton.styleFrom(primary: Colors.green),
                           onPressed: running
@@ -271,25 +277,54 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                 ),
               ),
               Expanded(
-                  child: Card(
-                child: ListView(
-                  children: [
-                    Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: outputError
-                            ? const SelectableText(
-                                'Syntax Error',
-                                style: TextStyle(color: Colors.red),
-                              )
-                            : SelectableText(byteOutput
-                                ? output
-                                    .join()
-                                    .codeUnits
-                                    .join(separateBytes ? ' ' : '')
-                                : output.join(separateBytes ? ' ' : '')))
-                  ],
+                child: OpenContainer(
+                  transitionDuration: const Duration(milliseconds: 500),
+                  closedBuilder: (context, action) => ListView(
+                    children: [
+                      Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: outputError
+                              ? const SelectableText(
+                                  'Syntax Error',
+                                  style: TextStyle(color: Colors.red),
+                                )
+                              : Text(
+                                  byteOutput
+                                      ? output
+                                          .join()
+                                          .codeUnits
+                                          .join(separateBytes ? ' ' : '')
+                                      : output.join(separateBytes ? ' ' : ''),
+                                  // onTap: null,
+                                  // enableInteractiveSelection: false,
+                                )),
+                    ],
+                  ),
+                  openBuilder: (context, action) => Scaffold(
+                    body: ListView(
+                      children: [
+                        Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: outputError
+                                ? const SelectableText(
+                                    'Syntax Error',
+                                    style: TextStyle(color: Colors.red),
+                                  )
+                                : Text(
+                                    byteOutput
+                                        ? output
+                                            .join()
+                                            .codeUnits
+                                            .join(separateBytes ? ' ' : '')
+                                        : output.join(separateBytes ? ' ' : ''),
+                                    // onTap: null,
+                                    // enableInteractiveSelection: false,
+                                  )),
+                      ],
+                    ),
+                  ),
                 ),
-              ))
+              )
             ],
           ),
         ),
