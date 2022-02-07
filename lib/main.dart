@@ -7,10 +7,11 @@ import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
 // TODO: save code
 // TODO: open code from file
-// BUG:- disable autofocus on editor
 // TODO: input proccessor
 // TODO: infinite loop detector
 // TODO: keyboard hits should work
+
+// BUG: app should be resizable
 void main() {
   runApp(const BrainFucked());
 }
@@ -263,6 +264,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                           onPressed: running
                               ? null
                               : () {
+                                  focusNode.unfocus();
                                   compiler
                                       .compile(controller.value.text)
                                       .then((value) {
