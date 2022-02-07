@@ -3,10 +3,16 @@ import 'package:brain_fuck_compiler/compiler.dart';
 import 'package:brain_fuck_compiler/help.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
 // TODO: save code
 // TODO: open code from file
-// TODO: bug - disable autofocus on editor
+// BUG:- disable autofocus on editor
+// TODO: input proccessor
+// TODO: infinite loop detector
+// TODO: keyboard hits should work
+// TODO: Keyboard hits must auto scroll
+
 void main() {
   runApp(const BrainFucked());
 }
@@ -33,6 +39,7 @@ class BrainFuckedApp extends StatefulWidget {
 class _BrainFuckedAppState extends State<BrainFuckedApp> {
   Compiler compiler = Compiler();
   TextEditingController controller = TextEditingController();
+  ItemScrollController keyboardScrollController = ItemScrollController();
   FocusNode focusNode = FocusNode(canRequestFocus: false);
   int lines = 1, characters = 0;
   List<String> output = [];
@@ -42,6 +49,11 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
   bool byteOutput = false;
   bool separateBytes = false;
   bool running = false;
+  keyboardScrollTo(int index) {
+    keyboardScrollController.scrollTo(
+        index: index, duration: Duration(milliseconds: 500), alignment: 0.5);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,68 +90,128 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
               ),
               SizedBox(
                 height: MediaQuery.of(context).size.height / 2.2,
-                child: Card(
-                  child: ListView(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Column(
-                                    children: List.generate(
-                                  lines,
-                                  (index) => Text(
-                                    '${index + 1}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .subtitle1!
-                                        .copyWith(height: 1.2),
-                                  ),
-                                )),
-                              ),
-                              const VerticalDivider(),
-                              Expanded(
-                                child: TextField(
-                                  scrollPhysics:
-                                      const NeverScrollableScrollPhysics(),
-                                  controller: controller,
-                                  keyboardType: TextInputType.multiline,
-                                  maxLines: null,
-                                  focusNode: focusNode,
-                                  minLines: null,
-                                  autofocus: false,
-                                  expands: true,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      lines = value.characters
-                                              .where((p0) => p0 == '\n')
-                                              .length +
-                                          1;
-                                      characters = value.characters.length;
-                                    });
-                                  },
-                                  enableInteractiveSelection: true,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .subtitle1!
-                                      .copyWith(
-                                          height: 1.2, letterSpacing: 1.5),
-                                  decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      isDense: true,
-                                      hintText: 'Write your code here...'),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Card(
+                        child: ListView(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Column(
+                                          children: List.generate(
+                                        lines,
+                                        (index) => Text(
+                                          '${index + 1}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .subtitle1!
+                                              .copyWith(height: 1.2),
+                                        ),
+                                      )),
+                                    ),
+                                    const VerticalDivider(),
+                                    Expanded(
+                                      child: TextField(
+                                        scrollPhysics:
+                                            const NeverScrollableScrollPhysics(),
+                                        controller: controller,
+                                        keyboardType: TextInputType.multiline,
+                                        maxLines: null,
+                                        focusNode: focusNode,
+                                        minLines: null,
+                                        autofocus: false,
+                                        expands: true,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            lines = value.characters
+                                                    .where((p0) => p0 == '\n')
+                                                    .length +
+                                                1;
+                                            characters =
+                                                value.characters.length;
+                                          });
+                                        },
+                                        enableInteractiveSelection: true,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle1!
+                                            .copyWith(
+                                                height: 1.2,
+                                                letterSpacing: 1.5),
+                                        decoration: const InputDecoration(
+                                            border: InputBorder.none,
+                                            isDense: true,
+                                            hintText:
+                                                'Write your code here...'),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: Card(
+                        child: ScrollablePositionedList.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemScrollController: keyboardScrollController,
+                            itemCount: 8,
+                            itemBuilder: (context, index) => [
+                                  TextButton(
+                                      onPressed: () {
+                                        keyboardScrollTo(0);
+                                      },
+                                      child: const Text('+')),
+                                  TextButton(
+                                      onPressed: () {
+                                        keyboardScrollTo(1);
+                                      },
+                                      child: const Text('-')),
+                                  TextButton(
+                                      onPressed: () {
+                                        keyboardScrollTo(2);
+                                      },
+                                      child: const Text('>')),
+                                  TextButton(
+                                      onPressed: () {
+                                        keyboardScrollTo(3);
+                                      },
+                                      child: const Text('<')),
+                                  TextButton(
+                                      onPressed: () {
+                                        keyboardScrollTo(4);
+                                      },
+                                      child: const Text('.')),
+                                  TextButton(
+                                      onPressed: () {
+                                        keyboardScrollTo(5);
+                                      },
+                                      child: const Text(',')),
+                                  TextButton(
+                                      onPressed: () {
+                                        keyboardScrollTo(6);
+                                      },
+                                      child: const Text('[')),
+                                  TextButton(
+                                      onPressed: () {
+                                        keyboardScrollTo(7);
+                                      },
+                                      child: const Text(']'))
+                                ][index]),
+                      ),
+                    )
+                  ],
                 ),
               ),
               Align(
