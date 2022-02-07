@@ -3,11 +3,11 @@ import 'package:brain_fuck_compiler/compiler.dart';
 import 'package:brain_fuck_compiler/help.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter/services.dart';
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
 // TODO: save code
 // TODO: open code from file
-// TODO: input proccessor
 // TODO: infinite loop detector
 // TODO: keyboard hits should work
 
@@ -265,18 +265,99 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                               ? null
                               : () {
                                   focusNode.unfocus();
-                                  compiler
-                                      .compile(controller.value.text)
-                                      .then((value) {
-                                    setState(() {
-                                      running = false;
-                                      output = value ?? [];
-                                      outputError = value == null;
+                                  int count = compiler
+                                      .getInputCount(controller.value.text);
+                                  if (count > 0) {
+                                    List<int> inputs = List.filled(count, 0);
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                              title: Text(
+                                                  'Your code requires ' +
+                                                      ((count == 1)
+                                                          ? 'an input'
+                                                          : '$count inputs')),
+                                              content: Card(
+                                                child: Column(
+                                                  children:
+                                                      List<Widget>.generate(
+                                                          count,
+                                                          (index) => TextField(
+                                                                onChanged:
+                                                                    (value) {
+                                                                  if (int.tryParse(
+                                                                          value) !=
+                                                                      null) {
+                                                                    inputs[index] =
+                                                                        int.parse(
+                                                                            value);
+                                                                  }
+                                                                },
+                                                                inputFormatters: [
+                                                                  FilteringTextInputFormatter
+                                                                      .digitsOnly
+                                                                ],
+                                                                decoration:
+                                                                    InputDecoration(
+                                                                        hintText:
+                                                                            'input ${index + 1}'),
+                                                              )),
+                                                ),
+                                              ),
+                                              scrollable: true,
+                                              actions: [
+                                                ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                            primary:
+                                                                Colors.red),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child:
+                                                        const Text('Cancel')),
+                                                ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                            primary:
+                                                                Colors.green),
+                                                    onPressed: () {
+                                                      compiler
+                                                          .compile(
+                                                              controller
+                                                                  .value.text,
+                                                              inputs: inputs)
+                                                          .then((value) {
+                                                        setState(() {
+                                                          running = false;
+                                                          output = value ?? [];
+                                                          outputError =
+                                                              value == null;
+                                                        });
+                                                      });
+                                                      setState(() {
+                                                        running = true;
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child:
+                                                        const Text('Submit')),
+                                              ],
+                                            ));
+                                  } else {
+                                    compiler
+                                        .compile(controller.value.text)
+                                        .then((value) {
+                                      setState(() {
+                                        running = false;
+                                        output = value ?? [];
+                                        outputError = value == null;
+                                      });
                                     });
-                                  });
-                                  setState(() {
-                                    running = true;
-                                  });
+                                    setState(() {
+                                      running = true;
+                                    });
+                                  }
                                 },
                           child: const Text('Run')),
                     ],
