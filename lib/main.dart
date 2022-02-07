@@ -9,7 +9,6 @@ import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 // TODO: save code
 // TODO: open code from file
 // TODO: infinite loop detector
-// TODO: keyboard hits should work
 
 // BUG: app should be resizable
 void main() {
@@ -48,9 +47,20 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
   bool byteOutput = false;
   bool separateBytes = false;
   bool running = false;
-  keyboardScrollTo(int index) {
+  void keyboardScrollTo(int index) {
     keyboardScrollController.scrollTo(
         index: index, duration: Duration(milliseconds: 500), alignment: 0.5);
+  }
+
+  void enterKey(String key) {
+    if (!focusNode.hasFocus) return;
+    String text = controller.text;
+    TextSelection selection = controller.selection;
+    String newText = text.replaceRange(selection.start, selection.end, key);
+    controller.text = newText;
+    controller.selection = selection.copyWith(
+        baseOffset: selection.start + key.length,
+        extentOffset: selection.start + key.length);
   }
 
   @override
@@ -185,21 +195,25 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(0);
+                                        enterKey('+');
                                       },
                                       child: const Text('+')),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(1);
+                                        enterKey('-');
                                       },
                                       child: const Text('-')),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(2);
+                                        enterKey('>');
                                       },
                                       child: const Text('>')),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(3);
+                                        enterKey('<');
                                       },
                                       child: const Text('<')),
                                   TextButton(
@@ -210,16 +224,19 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(5);
+                                        enterKey(',');
                                       },
                                       child: const Text(',')),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(6);
+                                        enterKey('[');
                                       },
                                       child: const Text('[')),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(7);
+                                        enterKey(']');
                                       },
                                       child: const Text(']'))
                                 ][index]),
