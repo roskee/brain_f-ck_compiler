@@ -11,7 +11,6 @@ import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 // TODO: input proccessor
 // TODO: infinite loop detector
 // TODO: keyboard hits should work
-// TODO: Keyboard hits must auto scroll
 
 void main() {
   runApp(const BrainFucked());
@@ -93,70 +92,77 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                 child: Column(
                   children: [
                     Expanded(
-                      child: Card(
-                        child: ListView(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8),
-                                      child: Column(
-                                          children: List.generate(
-                                        lines,
-                                        (index) => Text(
-                                          '${index + 1}',
+                      child: GestureDetector(
+                        onTap: () {
+                          focusNode.requestFocus();
+                        },
+                        child: Card(
+                          child: ListView(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: IntrinsicHeight(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8),
+                                        child: Column(
+                                            children: List.generate(
+                                          lines,
+                                          (index) => Text(
+                                            '${index + 1}',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .subtitle1!
+                                                .copyWith(height: 1.2),
+                                          ),
+                                        )),
+                                      ),
+                                      const VerticalDivider(),
+                                      Expanded(
+                                        child: TextField(
+                                          scrollPhysics:
+                                              const NeverScrollableScrollPhysics(),
+                                          controller: controller,
+                                          keyboardType: TextInputType.multiline,
+                                          onEditingComplete: () {},
+                                          maxLines: null,
+                                          focusNode: focusNode,
+                                          minLines: null,
+                                          autofocus: false,
+                                          expands: true,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              lines = value.characters
+                                                      .where((p0) => p0 == '\n')
+                                                      .length +
+                                                  1;
+                                              characters =
+                                                  value.characters.length;
+                                            });
+                                          },
+                                          enableInteractiveSelection: true,
                                           style: Theme.of(context)
                                               .textTheme
                                               .subtitle1!
-                                              .copyWith(height: 1.2),
+                                              .copyWith(
+                                                  height: 1.2,
+                                                  letterSpacing: 1.5),
+                                          decoration: const InputDecoration(
+                                              border: InputBorder.none,
+                                              isDense: true,
+                                              hintText:
+                                                  'Write your code here...'),
                                         ),
-                                      )),
-                                    ),
-                                    const VerticalDivider(),
-                                    Expanded(
-                                      child: TextField(
-                                        scrollPhysics:
-                                            const NeverScrollableScrollPhysics(),
-                                        controller: controller,
-                                        keyboardType: TextInputType.multiline,
-                                        maxLines: null,
-                                        focusNode: focusNode,
-                                        minLines: null,
-                                        autofocus: false,
-                                        expands: true,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            lines = value.characters
-                                                    .where((p0) => p0 == '\n')
-                                                    .length +
-                                                1;
-                                            characters =
-                                                value.characters.length;
-                                          });
-                                        },
-                                        enableInteractiveSelection: true,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .subtitle1!
-                                            .copyWith(
-                                                height: 1.2,
-                                                letterSpacing: 1.5),
-                                        decoration: const InputDecoration(
-                                            border: InputBorder.none,
-                                            isDense: true,
-                                            hintText:
-                                                'Write your code here...'),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
