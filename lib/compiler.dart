@@ -84,6 +84,7 @@ class Compiler {
 
   void _clear() {
     _array.setAll(0, List.filled(30000, 0, growable: false));
+    _inputCounter = 0;
     _index = 0;
   }
 
@@ -121,7 +122,7 @@ class Compiler {
     if (counter == 0) return [];
     return counter > inputs.length
         ? List<int>.generate(
-            counter, (index) => index < inputs.length ? inputs[index] : 0)
+            counter, (index) => index < inputs.length - 1 ? inputs[index] : 0)
         : inputs;
   }
 
