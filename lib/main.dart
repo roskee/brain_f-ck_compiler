@@ -20,7 +20,7 @@ class BrainFucked extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'BrainF*cked',
+        title: 'BrainF*ck Compiler',
         theme:
             ThemeData(primarySwatch: Colors.lightGreen, fontFamily: "Consolas"),
         home: const BrainFuckedApp(),
@@ -79,7 +79,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('BrainF*cked Compiler'),
+        title: const Text('BrainF*ck Compiler'),
         actions: [
           PopupMenuButton(
               onSelected: (value) {
