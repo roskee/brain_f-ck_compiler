@@ -53,7 +53,10 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
   }
 
   void enterKey(String key) {
-    if (!focusNode.hasFocus) return;
+    if (!focusNode.hasFocus) {
+      focusNode.requestFocus();
+      return;
+    }
     String text = controller.text;
     TextSelection selection = controller.selection;
     String newText = text.replaceRange(selection.start, selection.end, key);
@@ -61,6 +64,14 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
     controller.selection = selection.copyWith(
         baseOffset: selection.start + key.length,
         extentOffset: selection.start + key.length);
+    setCounters(newText);
+  }
+
+  void setCounters(String value) {
+    setState(() {
+      lines = value.characters.where((p0) => p0 == '\n').length + 1;
+      characters = value.characters.length;
+    });
   }
 
   @override
@@ -149,15 +160,7 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                                               autofocus: false,
                                               expands: true,
                                               onChanged: (value) {
-                                                setState(() {
-                                                  lines = value.characters
-                                                          .where((p0) =>
-                                                              p0 == '\n')
-                                                          .length +
-                                                      1;
-                                                  characters =
-                                                      value.characters.length;
-                                                });
+                                                setCounters(value);
                                               },
                                               enableInteractiveSelection: true,
                                               style: Theme.of(context)
@@ -197,48 +200,65 @@ class _BrainFuckedAppState extends State<BrainFuckedApp> {
                                         keyboardScrollTo(0);
                                         enterKey('+');
                                       },
-                                      child: const Text('+')),
+                                      child: const Text('+',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold))),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(1);
                                         enterKey('-');
                                       },
-                                      child: const Text('-')),
+                                      child: const Text('-',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold))),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(2);
                                         enterKey('>');
                                       },
-                                      child: const Text('>')),
+                                      child: const Text('>',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold))),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(3);
                                         enterKey('<');
                                       },
-                                      child: const Text('<')),
+                                      child: const Text('<',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold))),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(4);
+                                        enterKey('.');
                                       },
-                                      child: const Text('.')),
+                                      child: const Text('.',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold))),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(5);
                                         enterKey(',');
                                       },
-                                      child: const Text(',')),
+                                      child: const Text(',',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold))),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(6);
                                         enterKey('[');
                                       },
-                                      child: const Text('[')),
+                                      child: const Text('[',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold))),
                                   TextButton(
                                       onPressed: () {
                                         keyboardScrollTo(7);
                                         enterKey(']');
                                       },
-                                      child: const Text(']'))
+                                      child: const Text(']',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)))
                                 ][index]),
                       ),
                     )
