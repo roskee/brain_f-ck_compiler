@@ -19,6 +19,8 @@ class Compiler {
   final List<int> _array = List.filled(30000, 0, growable: false);
   int _index = 0;
   int _inputCounter = 0;
+  List<int> inputs = List.filled(0, 0, growable: true);
+  final Stopwatch s = Stopwatch();
   // PUBLIC METHODS
 
   /// This function interpretes [command] as a brainf*cked code with optional inputs [inputs] if requested.
@@ -30,17 +32,27 @@ class Compiler {
   /// But if [command] doesn't produce any outputs empty string is returned
   Future<List<String>?> compile(String command,
       {List<int> inputs = const []}) async {
+    await Future.delayed(const Duration(milliseconds: 1000), () {});
     _clear();
     if (!_parseInput(command)) return null;
-    inputs = _getParsedInputs(command, inputs);
-    List<String> output = parse(command, inputs: inputs);
+    this.inputs = _getParsedInputs(command, inputs);
+    s.reset();
+    s.start();
+    List<String> output = parse(command);
+    s.stop();
     return output;
   }
 
-  List<String> parse(String command, {List<int> inputs = const []}) {
+  List<String> parse(String command) {
     List<String> output = [];
+    if (s.elapsedMilliseconds > 1000) return [];
+    print('continuing loop');
     for (int i = 0; i < command.length; i++) {
       // for each input variable
+      if (s.elapsedMilliseconds > 1000) {
+        print('brock loop');
+        break;
+      }
       switch (command.codeUnitAt(i)) {
         case 62: // >
           _incrementIndex();
@@ -55,16 +67,27 @@ class Compiler {
           _decrementValue();
           break;
         case 44: // ,
-          _setInput(inputs[_inputCounter++]);
+          _inputCounter++;
+          if (inputs.length > _inputCounter) {
+            _setInput(inputs[_inputCounter++]);
+          } else {
+            _setInput(0);
+          }
           break;
         case 46: // .
           // output += _getOutput();
           output.add(_getOutput());
           break;
         case 91: // [
+          // This is an expensive operation so is limited to only go to a max 1 second cycle
           while (_array[_index] != 0) {
             // loop
             //output +=
+            if (s.elapsedMilliseconds > 1000) {
+              output.add('\nTime limit Reached');
+              break;
+            }
+            print('while executing');
             output.addAll(
                 parse(command.substring(i + 1, _indexOfBracket(command, i))));
           }

@@ -8,9 +8,9 @@ import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
 // TODO: save code
 // TODO: open code from file
-// TODO: infinite loop detector
 
 // BUG: app should be resizable
+// BUG: app crashes if prints in compiler.dart are removed
 void main() {
   runApp(const BrainFucked());
 }
