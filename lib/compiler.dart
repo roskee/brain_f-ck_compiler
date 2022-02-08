@@ -91,7 +91,7 @@ class Compiler {
             output.addAll(
                 parse(command.substring(i + 1, _indexOfBracket(command, i))));
           }
-          i = _indexOfBracket(command, i) + 1;
+          i = _indexOfBracket(command, i);
           break;
         default: // comment character
       }
